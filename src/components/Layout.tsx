@@ -43,7 +43,7 @@ export default function Layout({ children, currentView, onViewChange }: LayoutPr
 
       {/* Sidebar */}
       <div className={cn(
-        "fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0",
+        "fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0 lg:z-auto",
         sidebarOpen ? "translate-x-0" : "-translate-x-full"
       )}>
         <div className="flex items-center justify-between h-16 px-6 border-b border-gray-200">
@@ -88,7 +88,7 @@ export default function Layout({ children, currentView, onViewChange }: LayoutPr
         </nav>
 
         {/* Bottom section */}
-        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200">
+        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200 bg-white">
           <div className="bg-blue-50 rounded-lg p-3">
             <div className="flex items-center space-x-2">
               <TrendingUp className="w-4 h-4 text-blue-600" />
@@ -101,7 +101,7 @@ export default function Layout({ children, currentView, onViewChange }: LayoutPr
       </div>
 
       {/* Main content */}
-      <div className="lg:pl-64">
+      <div className="lg:pl-64 flex-1">
         {/* Top bar */}
         <div className="sticky top-0 z-30 bg-white shadow-sm border-b border-gray-200">
           <div className="flex items-center justify-between h-16 px-4 sm:px-6 lg:px-8">
@@ -128,7 +128,7 @@ export default function Layout({ children, currentView, onViewChange }: LayoutPr
         </div>
 
         {/* Page content */}
-        <main className="p-4 sm:p-6 lg:p-8">
+        <main className="p-4 sm:p-6 lg:p-8 min-h-screen">
           {children}
         </main>
       </div>

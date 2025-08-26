@@ -135,3 +135,12 @@ export interface Nudge {
   phase: Phase;
   domain?: Domain;
 }
+
+export interface DailyProgressData {
+  date: string;
+  domainScores: Record<Domain, number>;
+  notes: string;
+  mood: number;
+  energy: number;
+  focus: number;
+}

@@ -15,6 +15,7 @@ import TaskInbox from '@/components/TaskInbox';
 import CareerBoard from '@/components/CareerBoard';
 import WeeklyReview from '@/components/WeeklyReview';
 import AIInsights from '@/components/AIInsights';
+import DailyProgress, { DailyProgressData } from '@/components/DailyProgress';
 
 // Sample data for demonstration
 const sampleMomentumData: MomentumScore[] = [
@@ -147,6 +148,12 @@ export default function Home() {
     // In a real app, this would open a detailed view
   };
 
+  const handleSaveProgress = (progress: DailyProgressData) => {
+    console.log('Progress saved:', progress);
+    // In a real app, this would save to a database
+    // and update momentum calculations
+  };
+
   const renderCurrentView = () => {
     switch (currentView) {
       case 'dashboard':
@@ -159,9 +166,9 @@ export default function Home() {
             </div>
 
             {/* Main content grid */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 lg:gap-8">
               {/* Left column - Momentum Ribbon */}
-              <div className="lg:col-span-2">
+              <div className="xl:col-span-2">
                 <MomentumRibbon 
                   momentumData={sampleMomentumData}
                   onDomainClick={handleDomainClick}
@@ -169,7 +176,7 @@ export default function Home() {
               </div>
 
               {/* Right column - Leaderboard */}
-              <div>
+              <div className="xl:col-span-1">
                 <Leaderboard 
                   momentumData={sampleMomentumData}
                   onDomainClick={handleDomainClick}
@@ -181,21 +188,36 @@ export default function Home() {
             {/* AI Insights */}
             <AIInsights momentumData={sampleMomentumData} />
             
-            {/* Bottom section - Quick actions */}
+            {/* Daily Progress Input */}
+            <DailyProgress 
+              domains={domains}
+              onSaveProgress={handleSaveProgress}
+            />
+            
+            {/* Quick Actions */}
             <div className="bg-white rounded-lg border border-gray-200 p-6">
               <h2 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h2>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <button className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-left">
-                  <div className="font-medium text-gray-900">Log Today&apos;s Progress</div>
-                  <div className="text-sm text-gray-500">Record your daily metrics</div>
-                </button>
-                <button className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-left">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <button 
+                  onClick={() => setCurrentView('tasks')}
+                  className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-left"
+                >
                   <div className="font-medium text-gray-900">Add New Task</div>
                   <div className="text-sm text-gray-500">Create a new tracking goal</div>
                 </button>
-                <button className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-left">
+                <button 
+                  onClick={() => setCurrentView('review')}
+                  className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-left"
+                >
                   <div className="font-medium text-gray-900">View Weekly Review</div>
                   <div className="text-sm text-gray-500">See your AI-generated summary</div>
+                </button>
+                <button 
+                  onClick={() => setCurrentView('career')}
+                  className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-left"
+                >
+                  <div className="font-medium text-gray-900">Career Progress</div>
+                  <div className="text-sm text-gray-500">Track your career transition</div>
                 </button>
               </div>
             </div>

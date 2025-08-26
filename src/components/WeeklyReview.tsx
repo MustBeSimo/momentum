@@ -1,7 +1,7 @@
 'use client';
 
-import { WeeklyReview as WeeklyReviewType } from '@/types';
-import { generateWeeklyReview, WeeklyReviewInsight } from '@/lib/ai';
+import { WeeklyReview as WeeklyReviewType, Domain, Phase } from '@/types';
+import { generateWeeklyReview } from '@/lib/ai';
 import { Calendar, TrendingUp, TrendingDown, Target, Download, Share2, Sparkles } from 'lucide-react';
 
 interface WeeklyReviewProps {
@@ -16,13 +16,13 @@ export default function WeeklyReview({ review, onExport, onShare }: WeeklyReview
   // Generate AI insights for this week
   const aiInsights = generateWeeklyReview(
     domains.map(d => ({
-      domain: d.name as any,
+      domain: d.name as Domain,
       ema: d.ema,
       velocity: d.velocity,
       acceleration: d.acceleration,
       streak: d.streak,
       momentumScore: d.ema,
-      phase: 'Cruise' as any
+      phase: 'Cruise' as Phase
     })),
     [], // tasks would be passed here in a real implementation
     1 // week number

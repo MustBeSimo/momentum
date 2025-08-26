@@ -1,8 +1,8 @@
 'use client';
 
 import { MomentumScore } from '@/types';
-import { analyzeMomentum, MomentumInsight } from '@/lib/ai';
-import { Sparkles, TrendingUp, TrendingDown, Target, AlertTriangle } from 'lucide-react';
+import { analyzeMomentum } from '@/lib/ai';
+import { Sparkles, TrendingUp, TrendingDown, Target } from 'lucide-react';
 
 interface AIInsightsProps {
   momentumData: MomentumScore[];

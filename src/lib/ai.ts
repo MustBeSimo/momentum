@@ -1,4 +1,4 @@
-import { Task, Domain, TaskType, MomentumScore } from '@/types';
+import { Task, Domain, TaskType, MomentumScore, Phase, DailyProgressData } from '@/types';
 
 // AI-powered task classification
 export interface TaskClassification {
@@ -143,7 +143,7 @@ export interface WeeklyReviewInsight {
 
 export function generateWeeklyReview(
   momentumData: MomentumScore[],
-  tasks: Task[],
+  _tasks: Task[],
   weekNumber: number
 ): WeeklyReviewInsight {
   const insights = analyzeMomentum(momentumData);
@@ -221,4 +221,148 @@ export function generateSmartNotifications(
   });
   
   return notifications;
+}
+
+// Enhanced momentum calculation from daily progress
+export function calculateMomentumFromProgress(
+  dailyProgress: DailyProgressData[],
+  domain: Domain
+): MomentumScore {
+  if (dailyProgress.length === 0) {
+    return {
+      domain,
+      ema: 0,
+      velocity: 0,
+      acceleration: 0,
+      streak: 0,
+      momentumScore: 0,
+      phase: 'Drift'
+    };
+  }
+
+  // Get scores for this domain
+  const domainScores = dailyProgress
+    .map(p => p.domainScores[domain])
+    .filter(score => score !== undefined);
+
+  if (domainScores.length === 0) {
+    return {
+      domain,
+      ema: 0,
+      velocity: 0,
+      acceleration: 0,
+      streak: 0,
+      momentumScore: 0,
+      phase: 'Drift'
+    };
+  }
+
+  // Calculate EMA (Exponential Moving Average)
+  const alpha = 0.3; // Smoothing factor
+  let ema = domainScores[0];
+  for (let i = 1; i < domainScores.length; i++) {
+    ema = alpha * domainScores[i] + (1 - alpha) * ema;
+  }
+
+  // Calculate velocity (rate of change)
+  const recentScores = domainScores.slice(-7); // Last 7 days
+  const velocity = recentScores.length > 1 
+    ? (recentScores[recentScores.length - 1] - recentScores[0]) / recentScores.length
+    : 0;
+
+  // Calculate acceleration (change in velocity)
+  const acceleration = recentScores.length > 2
+    ? (recentScores[recentScores.length - 1] - 2 * recentScores[recentScores.length - 2] + recentScores[recentScores.length - 3]) / 2
+    : 0;
+
+  // Calculate streak
+  let streak = 0;
+  for (let i = domainScores.length - 1; i >= 0; i--) {
+    if (domainScores[i] >= 7) { // Good score threshold
+      streak++;
+    } else {
+      break;
+    }
+  }
+
+  // Determine phase
+  let phase: Phase = 'Drift';
+  if (velocity > 0.5 && ema > 8) {
+    phase = 'Rocket';
+  } else if (velocity > 0.2 && ema > 7) {
+    phase = 'Ramp';
+  } else if (velocity > -0.1 && ema > 6) {
+    phase = 'Cruise';
+  } else if (velocity < -0.2) {
+    phase = 'Drift';
+  }
+
+  return {
+    domain,
+    ema: Math.round(ema * 10) / 10,
+    velocity: Math.round(velocity * 100) / 100,
+    acceleration: Math.round(acceleration * 100) / 100,
+    streak,
+    momentumScore: Math.round(ema * 10),
+    phase
+  };
+}
+
+// AI-powered habit recommendations
+export interface HabitRecommendation {
+  domain: Domain;
+  habit: string;
+  reasoning: string;
+  impact: 'high' | 'medium' | 'low';
+  difficulty: 'easy' | 'medium' | 'hard';
+}
+
+export function generateHabitRecommendations(
+  momentumData: MomentumScore[],
+  dailyProgress: DailyProgressData[]
+): HabitRecommendation[] {
+  const recommendations: HabitRecommendation[] = [];
+  
+  // Find domains that need improvement
+  const strugglingDomains = momentumData.filter(d => d.velocity < 0 && d.ema < 7);
+  
+  strugglingDomains.forEach(domain => {
+    const domainProgress = dailyProgress
+      .filter(p => p.domainScores[domain.domain] < 7)
+      .slice(-5); // Last 5 low scores
+    
+    if (domainProgress.length > 0) {
+      // Analyze patterns in low scores
+      const avgMood = domainProgress.reduce((sum, p) => sum + p.mood, 0) / domainProgress.length;
+      const avgEnergy = domainProgress.reduce((sum, p) => sum + p.energy, 0) / domainProgress.length;
+      
+      if (domain.domain === 'Health' && avgEnergy < 6) {
+        recommendations.push({
+          domain: domain.domain,
+          habit: 'Sleep 8 hours consistently',
+          reasoning: 'Your energy levels are low, which affects all other domains',
+          impact: 'high',
+          difficulty: 'medium'
+        });
+      } else if (domain.domain === 'Focus' && avgMood < 6) {
+        recommendations.push({
+          domain: domain.domain,
+          habit: 'Morning gratitude practice',
+          reasoning: 'Your mood affects focus. Start each day with positive reflection',
+          impact: 'medium',
+          difficulty: 'easy'
+        });
+      } else if (domain.domain === 'Output') {
+        recommendations.push({
+          domain: domain.domain,
+          habit: 'Time-block your most important task',
+          reasoning: 'Structure your day around your highest priority work',
+          impact: 'high',
+          difficulty: 'medium'
+        });
+      }
+    }
+  });
+  
+  return recommendations.slice(0, 3); // Return top 3 recommendations
 }
