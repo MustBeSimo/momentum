@@ -189,7 +189,7 @@ export interface SmartNotification {
 
 export function generateSmartNotifications(
   momentumData: MomentumScore[],
-  tasks: Task[]
+  _tasks: Task[]
 ): SmartNotification[] {
   const notifications: SmartNotification[] = [];
   
@@ -288,7 +288,7 @@ export function calculateMomentumFromProgress(
   // Determine phase
   let phase: Phase = 'Drift';
   if (velocity > 0.5 && ema > 8) {
-    phase = 'Rocket';
+    phase = 'Ramp';
   } else if (velocity > 0.2 && ema > 7) {
     phase = 'Ramp';
   } else if (velocity > -0.1 && ema > 6) {

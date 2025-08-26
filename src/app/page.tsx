@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { 
   MomentumScore, 
   CareerFunnel, 
@@ -16,6 +16,8 @@ import CareerBoard from '@/components/CareerBoard';
 import WeeklyReview from '@/components/WeeklyReview';
 import AIInsights from '@/components/AIInsights';
 import DailyProgress, { DailyProgressData } from '@/components/DailyProgress';
+import Onboarding, { UserConfig } from '@/components/Onboarding';
+import PersonalizedDashboard from '@/components/PersonalizedDashboard';
 
 // Sample data for demonstration
 const sampleMomentumData: MomentumScore[] = [
@@ -127,6 +129,8 @@ const domains: Domain[] = ['Health', 'Focus', 'Output', 'Learning', 'Mood'];
 export default function Home() {
   const [currentView, setCurrentView] = useState('dashboard');
   const [tasks, setTasks] = useState<Task[]>([]);
+  const [userConfig, setUserConfig] = useState<UserConfig | null>(null);
+  const [showOnboarding, setShowOnboarding] = useState(true);
 
   const handleAddTask = (taskData: Omit<Task, 'id' | 'userId' | 'createdAt'>) => {
     const newTask: Task = {
@@ -154,73 +158,104 @@ export default function Home() {
     // and update momentum calculations
   };
 
+  const handleOnboardingComplete = (config: UserConfig) => {
+    setUserConfig(config);
+    setShowOnboarding(false);
+    // In a real app, this would save to localStorage or database
+    localStorage.setItem('userConfig', JSON.stringify(config));
+  };
+
+  // Load user config from localStorage on app start
+  useEffect(() => {
+    const savedConfig = localStorage.getItem('userConfig');
+    if (savedConfig) {
+      try {
+        const config = JSON.parse(savedConfig);
+        setUserConfig(config);
+        setShowOnboarding(false);
+      } catch (error) {
+        console.error('Failed to load user config:', error);
+      }
+    }
+  }, []);
+
   const renderCurrentView = () => {
     switch (currentView) {
       case 'dashboard':
         return (
           <div className="space-y-8">
-            {/* Header */}
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-              <p className="text-gray-600 mt-2">Track your momentum across all life domains</p>
-            </div>
+            {userConfig ? (
+              <PersonalizedDashboard 
+                userConfig={userConfig}
+                momentumData={sampleMomentumData}
+                onViewChange={setCurrentView}
+              />
+            ) : (
+              <>
+                {/* Header */}
+                <div>
+                  <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
+                  <p className="text-gray-600 mt-2">Track your momentum across all life domains</p>
+                </div>
 
-            {/* Main content grid */}
-            <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 lg:gap-8">
-              {/* Left column - Momentum Ribbon */}
-              <div className="xl:col-span-2">
-                <MomentumRibbon 
-                  momentumData={sampleMomentumData}
-                  onDomainClick={handleDomainClick}
+                {/* Main content grid */}
+                <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 lg:gap-8">
+                  {/* Left column - Momentum Ribbon */}
+                  <div className="xl:col-span-2">
+                    <MomentumRibbon 
+                      momentumData={sampleMomentumData}
+                      onDomainClick={handleDomainClick}
+                    />
+                  </div>
+
+                  {/* Right column - Leaderboard */}
+                  <div className="xl:col-span-1">
+                    <Leaderboard 
+                      momentumData={sampleMomentumData}
+                      onDomainClick={handleDomainClick}
+                      onViewDetails={handleViewDetails}
+                    />
+                  </div>
+                </div>
+
+                {/* AI Insights */}
+                <AIInsights momentumData={sampleMomentumData} />
+                
+                {/* Daily Progress Input */}
+                <DailyProgress 
+                  domains={domains}
+                  onSaveProgress={handleSaveProgress}
                 />
-              </div>
-
-              {/* Right column - Leaderboard */}
-              <div className="xl:col-span-1">
-                <Leaderboard 
-                  momentumData={sampleMomentumData}
-                  onDomainClick={handleDomainClick}
-                  onViewDetails={handleViewDetails}
-                />
-              </div>
-            </div>
-
-            {/* AI Insights */}
-            <AIInsights momentumData={sampleMomentumData} />
-            
-            {/* Daily Progress Input */}
-            <DailyProgress 
-              domains={domains}
-              onSaveProgress={handleSaveProgress}
-            />
-            
-            {/* Quick Actions */}
-            <div className="bg-white rounded-lg border border-gray-200 p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                <button 
-                  onClick={() => setCurrentView('tasks')}
-                  className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-left"
-                >
-                  <div className="font-medium text-gray-900">Add New Task</div>
-                  <div className="text-sm text-gray-500">Create a new tracking goal</div>
-                </button>
-                <button 
-                  onClick={() => setCurrentView('review')}
-                  className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-left"
-                >
-                  <div className="font-medium text-gray-900">View Weekly Review</div>
-                  <div className="text-sm text-gray-500">See your AI-generated summary</div>
-                </button>
-                <button 
-                  onClick={() => setCurrentView('career')}
-                  className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-left"
-                >
-                  <div className="font-medium text-gray-900">Career Progress</div>
-                  <div className="text-sm text-gray-500">Track your career transition</div>
-                </button>
-              </div>
-            </div>
+                
+                {/* Quick Actions */}
+                <div className="bg-white rounded-lg border border-gray-200 p-6">
+                  <h2 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h2>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <button 
+                      onClick={() => setCurrentView('tasks')}
+                      className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-left"
+                    >
+                      <div className="font-medium text-gray-900">Add New Task</div>
+                      <div className="text-sm text-gray-500">Create a new tracking goal</div>
+                    </button>
+                    <button 
+                      onClick={() => setCurrentView('review')}
+                      className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-left"
+                    >
+                      <div className="font-medium text-gray-900">View Weekly Review</div>
+                      <div className="text-sm text-gray-500">See your AI-generated summary</div>
+                    </button>
+                    <button 
+                      onClick={() => setCurrentView('career')}
+                      className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-left"
+                    >
+                      <div className="font-medium text-gray-900">Career Progress</div>
+                      <div className="text-sm text-gray-500">Track your career transition</div>
+                    </button>
+                  </div>
+                </div>
+              </>
+            )}
           </div>
         );
 
@@ -278,6 +313,11 @@ export default function Home() {
         return <div>Page not found</div>;
     }
   };
+
+  // Show onboarding if not completed
+  if (showOnboarding) {
+    return <Onboarding onComplete={handleOnboardingComplete} />;
+  }
 
   return (
     <Layout currentView={currentView} onViewChange={setCurrentView}>
