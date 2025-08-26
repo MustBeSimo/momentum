@@ -3,7 +3,7 @@
 import { MomentumScore, Domain } from '@/types';
 import { getDomainColor, getPhaseColor, formatMomentumScore } from '@/lib/momentum';
 import { cn } from '@/lib/utils';
-import { TrendingUp, TrendingDown, Minus, MoreVertical, Target, BarChart3 } from 'lucide-react';
+import { TrendingUp, TrendingDown, Minus, MoreVertical, BarChart3 } from 'lucide-react';
 
 interface LeaderboardProps {
   momentumData: MomentumScore[];

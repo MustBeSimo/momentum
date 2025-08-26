@@ -1,8 +1,8 @@
 'use client';
 
 import { WeeklyReview as WeeklyReviewType } from '@/types';
-import { cn } from '@/lib/utils';
-import { Calendar, TrendingUp, TrendingDown, Target, Download, Share2 } from 'lucide-react';
+import { generateWeeklyReview, WeeklyReviewInsight } from '@/lib/ai';
+import { Calendar, TrendingUp, TrendingDown, Target, Download, Share2, Sparkles } from 'lucide-react';
 
 interface WeeklyReviewProps {
   review: WeeklyReviewType;
@@ -12,6 +12,21 @@ interface WeeklyReviewProps {
 
 export default function WeeklyReview({ review, onExport, onShare }: WeeklyReviewProps) {
   const { week, domains, career, topDrivers, goalsNextWeek } = review;
+  
+  // Generate AI insights for this week
+  const aiInsights = generateWeeklyReview(
+    domains.map(d => ({
+      domain: d.name as any,
+      ema: d.ema,
+      velocity: d.velocity,
+      acceleration: d.acceleration,
+      streak: d.streak,
+      momentumScore: d.ema,
+      phase: 'Cruise' as any
+    })),
+    [], // tasks would be passed here in a real implementation
+    1 // week number
+  );
   
   return (
     <div className="w-full space-y-6">
@@ -43,6 +58,43 @@ export default function WeeklyReview({ review, onExport, onShare }: WeeklyReview
       <div className="bg-blue-50 rounded-lg p-4">
         <h3 className="font-medium text-blue-900">Week of {week}</h3>
         <p className="text-sm text-blue-700">AI-generated momentum analysis</p>
+      </div>
+
+      {/* AI Summary */}
+      <div className="bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg p-4 border border-purple-200">
+        <div className="flex items-center space-x-2 mb-3">
+          <Sparkles className="w-5 h-5 text-purple-600" />
+          <h3 className="font-medium text-purple-900">AI Summary</h3>
+        </div>
+        <p className="text-sm text-purple-800 mb-3">{aiInsights.summary}</p>
+        
+        {aiInsights.highlights.length > 0 && (
+          <div className="mb-3">
+            <h4 className="text-xs font-medium text-purple-700 mb-1">Highlights:</h4>
+            <ul className="text-xs text-purple-600 space-y-1">
+              {aiInsights.highlights.map((highlight, index) => (
+                <li key={index} className="flex items-start space-x-1">
+                  <span>•</span>
+                  <span>{highlight}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+        
+        {aiInsights.recommendations.length > 0 && (
+          <div>
+            <h4 className="text-xs font-medium text-purple-700 mb-1">Recommendations:</h4>
+            <ul className="text-xs text-purple-600 space-y-1">
+              {aiInsights.recommendations.map((rec, index) => (
+                <li key={index} className="flex items-start space-x-1">
+                  <span>→</span>
+                  <span>{rec}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
       </div>
 
       {/* Momentum Summary */}

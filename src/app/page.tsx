@@ -14,6 +14,7 @@ import Leaderboard from '@/components/Leaderboard';
 import TaskInbox from '@/components/TaskInbox';
 import CareerBoard from '@/components/CareerBoard';
 import WeeklyReview from '@/components/WeeklyReview';
+import AIInsights from '@/components/AIInsights';
 
 // Sample data for demonstration
 const sampleMomentumData: MomentumScore[] = [
@@ -177,12 +178,15 @@ export default function Home() {
               </div>
             </div>
 
+            {/* AI Insights */}
+            <AIInsights momentumData={sampleMomentumData} />
+            
             {/* Bottom section - Quick actions */}
             <div className="bg-white rounded-lg border border-gray-200 p-6">
               <h2 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h2>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <button className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-left">
-                  <div className="font-medium text-gray-900">Log Today's Progress</div>
+                  <div className="font-medium text-gray-900">Log Today&apos;s Progress</div>
                   <div className="text-sm text-gray-500">Record your daily metrics</div>
                 </button>
                 <button className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-left">

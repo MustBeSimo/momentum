@@ -3,7 +3,8 @@
 import { useState } from 'react';
 import { Task, TaskType, Domain } from '@/types';
 import { cn } from '@/lib/utils';
-import { Plus, Target, Clock, Repeat, Search, Archive, CheckCircle } from 'lucide-react';
+import { Plus, Target, Clock, Repeat, Search, CheckCircle, Sparkles } from 'lucide-react';
+import { classifyTask, TaskClassification } from '@/lib/ai';
 
 interface TaskInboxProps {
   onAddTask: (task: Omit<Task, 'id' | 'userId' | 'createdAt'>) => void;
@@ -18,19 +19,36 @@ const taskTypeIcons = {
   Exploration: Search,
 };
 
-const taskTypeColors = {
-  Compounding: 'bg-blue-100 text-blue-800',
-  Milestone: 'bg-green-100 text-green-800',
-  Maintenance: 'bg-yellow-100 text-yellow-800',
-  Cyclical: 'bg-purple-100 text-purple-800',
-  Exploration: 'bg-gray-100 text-gray-800',
-};
+
 
 export default function TaskInbox({ onAddTask, domains }: TaskInboxProps) {
   const [taskText, setTaskText] = useState('');
   const [selectedDomain, setSelectedDomain] = useState<Domain>('Output');
   const [selectedTaskType, setSelectedTaskType] = useState<TaskType>('Compounding');
   const [dueDate, setDueDate] = useState('');
+  const [aiClassification, setAiClassification] = useState<TaskClassification | null>(null);
+  const [isClassifying, setIsClassifying] = useState(false);
+
+  const handleTaskTextChange = async (text: string) => {
+    setTaskText(text);
+    
+    // Auto-classify when user stops typing
+    if (text.trim().length > 10) {
+      setIsClassifying(true);
+      try {
+        const classification = await classifyTask(text);
+        setAiClassification(classification);
+        setSelectedDomain(classification.domain);
+        setSelectedTaskType(classification.taskType);
+      } catch (error) {
+        console.error('AI classification failed:', error);
+      } finally {
+        setIsClassifying(false);
+      }
+    } else {
+      setAiClassification(null);
+    }
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -46,6 +64,7 @@ export default function TaskInbox({ onAddTask, domains }: TaskInboxProps) {
     onAddTask(newTask);
     setTaskText('');
     setDueDate('');
+    setAiClassification(null);
   };
 
   return (
@@ -61,14 +80,44 @@ export default function TaskInbox({ onAddTask, domains }: TaskInboxProps) {
           <label htmlFor="taskText" className="block text-sm font-medium text-gray-700">
             What do you want to track?
           </label>
-          <textarea
-            id="taskText"
-            value={taskText}
-            onChange={(e) => setTaskText(e.target.value)}
-            placeholder="e.g., Write 200 words daily about Spatial AI"
-            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            rows={3}
-          />
+          <div className="relative">
+            <textarea
+              id="taskText"
+              value={taskText}
+              onChange={(e) => handleTaskTextChange(e.target.value)}
+              placeholder="e.g., Write 200 words daily about Spatial AI"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              rows={3}
+            />
+            {isClassifying && (
+              <div className="absolute top-2 right-2 flex items-center space-x-1 text-blue-600">
+                <Sparkles className="w-4 h-4 animate-pulse" />
+                <span className="text-xs">AI analyzing...</span>
+              </div>
+            )}
+          </div>
+          
+          {/* AI Classification Results */}
+          {aiClassification && (
+            <div className="bg-blue-50 border border-blue-200 rounded-md p-3">
+              <div className="flex items-center space-x-2 mb-2">
+                <Sparkles className="w-4 h-4 text-blue-600" />
+                <span className="text-sm font-medium text-blue-900">AI Suggestion</span>
+                <span className="text-xs text-blue-600">({(aiClassification.confidence * 100).toFixed(0)}% confidence)</span>
+              </div>
+              <div className="text-sm text-blue-800 space-y-1">
+                <div><strong>Domain:</strong> {aiClassification.domain}</div>
+                <div><strong>Type:</strong> {aiClassification.taskType}</div>
+                {aiClassification.difficulty && (
+                  <div><strong>Difficulty:</strong> {aiClassification.difficulty}</div>
+                )}
+                {aiClassification.estimatedHours && (
+                  <div><strong>Est. Time:</strong> {aiClassification.estimatedHours}h</div>
+                )}
+                <div className="text-xs text-blue-600 mt-2">{aiClassification.reasoning}</div>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Domain Selection */}
