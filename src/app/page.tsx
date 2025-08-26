@@ -1,103 +1,261 @@
-import Image from "next/image";
+'use client';
+
+import { useState } from 'react';
+import { 
+  MomentumScore, 
+  CareerFunnel, 
+  WeeklyReview as WeeklyReviewType,
+  Domain,
+  Task
+} from '@/types';
+import Layout from '@/components/Layout';
+import MomentumRibbon from '@/components/MomentumRibbon';
+import Leaderboard from '@/components/Leaderboard';
+import TaskInbox from '@/components/TaskInbox';
+import CareerBoard from '@/components/CareerBoard';
+import WeeklyReview from '@/components/WeeklyReview';
+
+// Sample data for demonstration
+const sampleMomentumData: MomentumScore[] = [
+  {
+    domain: 'Health',
+    ema: 0.8,
+    velocity: 0.15,
+    acceleration: 0.03,
+    streak: 7,
+    momentumScore: 85,
+    phase: 'Cruise'
+  },
+  {
+    domain: 'Focus',
+    ema: 0.6,
+    velocity: 0.25,
+    acceleration: 0.08,
+    streak: 3,
+    momentumScore: 92,
+    phase: 'Ramp'
+  },
+  {
+    domain: 'Output',
+    ema: 0.4,
+    velocity: -0.05,
+    acceleration: -0.02,
+    streak: 1,
+    momentumScore: 35,
+    phase: 'Drift'
+  },
+  {
+    domain: 'Learning',
+    ema: 0.7,
+    velocity: 0.12,
+    acceleration: 0.01,
+    streak: 5,
+    momentumScore: 78,
+    phase: 'Cruise'
+  },
+  {
+    domain: 'Mood',
+    ema: 0.9,
+    velocity: 0.08,
+    acceleration: -0.01,
+    streak: 12,
+    momentumScore: 88,
+    phase: 'Cruise'
+  }
+];
+
+const sampleCareerData: CareerFunnel[] = [
+  {
+    stage: 'Outreach',
+    count: 24,
+    velocity: 3.2,
+    conversionToNext: 0.25
+  },
+  {
+    stage: 'Replies',
+    count: 6,
+    velocity: 0.8,
+    conversionToNext: 0.33
+  },
+  {
+    stage: 'Interviews',
+    count: 2,
+    velocity: 0.3,
+    conversionToNext: 0.5
+  },
+  {
+    stage: 'Offers',
+    count: 1,
+    velocity: 0.1,
+    conversionToNext: 0
+  }
+];
+
+const sampleWeeklyReview: WeeklyReviewType = {
+  week: 'August 18, 2025',
+  domains: [
+    {
+      name: 'Output',
+      ema: 0.8,
+      velocity: 0.18,
+      acceleration: 0.03,
+      streak: 5,
+      highlights: ['Launched case study', '3 posts shipped']
+    },
+    {
+      name: 'Health',
+      ema: -0.2,
+      velocity: -0.09,
+      acceleration: -0.02,
+      streak: 2,
+      issues: ['Late screens', 'Inconsistent bedtime']
+    }
+  ],
+  career: {
+    outreach: 14,
+    replies: 4,
+    interviews: 2
+  },
+  topDrivers: ['Deep-work +42m', 'Social scroll −27m'],
+  goalsNextWeek: ['2 interviews booked', 'sleep ≥7h 5/7']
+};
+
+const domains: Domain[] = ['Health', 'Focus', 'Output', 'Learning', 'Mood'];
 
 export default function Home() {
-  return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const [currentView, setCurrentView] = useState('dashboard');
+  const [tasks, setTasks] = useState<Task[]>([]);
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
+  const handleAddTask = (taskData: Omit<Task, 'id' | 'userId' | 'createdAt'>) => {
+    const newTask: Task = {
+      ...taskData,
+      id: Math.random().toString(36).substr(2, 9),
+      userId: 'user-1',
+      createdAt: new Date()
+    };
+    setTasks([...tasks, newTask]);
+  };
+
+  const handleDomainClick = (domain: Domain) => {
+    console.log('Domain clicked:', domain);
+    // In a real app, this would navigate to domain detail view
+  };
+
+  const handleViewDetails = (domain: Domain) => {
+    console.log('View details for:', domain);
+    // In a real app, this would open a detailed view
+  };
+
+  const renderCurrentView = () => {
+    switch (currentView) {
+      case 'dashboard':
+        return (
+          <div className="space-y-8">
+            {/* Header */}
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
+              <p className="text-gray-600 mt-2">Track your momentum across all life domains</p>
+            </div>
+
+            {/* Main content grid */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              {/* Left column - Momentum Ribbon */}
+              <div className="lg:col-span-2">
+                <MomentumRibbon 
+                  momentumData={sampleMomentumData}
+                  onDomainClick={handleDomainClick}
+                />
+              </div>
+
+              {/* Right column - Leaderboard */}
+              <div>
+                <Leaderboard 
+                  momentumData={sampleMomentumData}
+                  onDomainClick={handleDomainClick}
+                  onViewDetails={handleViewDetails}
+                />
+              </div>
+            </div>
+
+            {/* Bottom section - Quick actions */}
+            <div className="bg-white rounded-lg border border-gray-200 p-6">
+              <h2 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h2>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <button className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-left">
+                  <div className="font-medium text-gray-900">Log Today's Progress</div>
+                  <div className="text-sm text-gray-500">Record your daily metrics</div>
+                </button>
+                <button className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-left">
+                  <div className="font-medium text-gray-900">Add New Task</div>
+                  <div className="text-sm text-gray-500">Create a new tracking goal</div>
+                </button>
+                <button className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-left">
+                  <div className="font-medium text-gray-900">View Weekly Review</div>
+                  <div className="text-sm text-gray-500">See your AI-generated summary</div>
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+
+      case 'tasks':
+        return (
+          <div className="space-y-8">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">Task Inbox</h1>
+              <p className="text-gray-600 mt-2">Add and classify new tasks to track</p>
+            </div>
+            <TaskInbox onAddTask={handleAddTask} domains={domains} />
+          </div>
+        );
+
+      case 'career':
+        return (
+          <div className="space-y-8">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">Career Board</h1>
+              <p className="text-gray-600 mt-2">Track your career transition progress</p>
+            </div>
+            <CareerBoard funnelData={sampleCareerData} />
+          </div>
+        );
+
+      case 'review':
+        return (
+          <div className="space-y-8">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">Weekly Review</h1>
+              <p className="text-gray-600 mt-2">AI-generated insights and next steps</p>
+            </div>
+            <WeeklyReview 
+              review={sampleWeeklyReview}
+              onExport={(format) => console.log('Export:', format)}
+              onShare={() => console.log('Share review')}
             />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+          </div>
+        );
+
+      case 'settings':
+        return (
+          <div className="space-y-8">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">Settings</h1>
+              <p className="text-gray-600 mt-2">Configure your Upraze experience</p>
+            </div>
+            <div className="bg-white rounded-lg border border-gray-200 p-6">
+              <p className="text-gray-500">Settings page coming soon...</p>
+            </div>
+          </div>
+        );
+
+      default:
+        return <div>Page not found</div>;
+    }
+  };
+
+  return (
+    <Layout currentView={currentView} onViewChange={setCurrentView}>
+      {renderCurrentView()}
+    </Layout>
   );
 }
