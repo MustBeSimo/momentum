@@ -278,13 +278,7 @@ export function scheduleNotifications(notifications: Notification[], settings: N
       sendBrowserNotification(notification.title, {
         body: notification.message,
         tag: notification.id,
-        requireInteraction: notification.priority === 'high',
-        actions: notification.action ? [
-          {
-            action: 'open',
-            title: notification.action
-          }
-        ] : undefined
+        requireInteraction: notification.priority === 'high'
       });
     }, delay);
   });
