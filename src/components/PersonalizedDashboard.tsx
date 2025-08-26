@@ -304,7 +304,7 @@ export default function PersonalizedDashboard({
         <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           <button 
-            onClick={() => onViewChange('tasks')}
+            onClick={() => onViewChange?.('tasks')}
             className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-left"
           >
             <div className="flex items-center space-x-2 mb-2">
@@ -315,7 +315,7 @@ export default function PersonalizedDashboard({
           </button>
           
           <button 
-            onClick={() => onViewChange('review')}
+            onClick={() => onViewChange?.('review')}
             className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-left"
           >
             <div className="flex items-center space-x-2 mb-2">
@@ -326,7 +326,7 @@ export default function PersonalizedDashboard({
           </button>
           
           <button 
-            onClick={() => onViewChange('career')}
+            onClick={() => onViewChange?.('career')}
             className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-left"
           >
             <div className="flex items-center space-x-2 mb-2">
