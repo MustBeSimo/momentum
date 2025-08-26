@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+
 import { UserConfig } from './Onboarding';
 
 import { 
@@ -248,19 +248,7 @@ export default function PersonalizedDashboard({
           ))}
         </div>
 
-        {showTips && (
-          <div className="mt-4 pt-4 border-t border-gray-200">
-            <h4 className="font-medium text-gray-900 mb-3">Phase-Specific Tips</h4>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {getPhaseInsight().tips.map((tip, index) => (
-                <div key={index} className="flex items-start space-x-2">
-                  <CheckCircle className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
-                  <span className="text-sm text-gray-700">{tip}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
+
       </div>
 
       {/* Goals Progress */}
