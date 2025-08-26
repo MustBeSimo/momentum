@@ -86,7 +86,7 @@ export default function PersonalizedDashboard({
         title: 'Energy-First Approach',
         message: 'Focus on activities that energize you rather than drain you',
         action: 'Review your energy anchors',
-        onClick: () => onViewChange?.('dashboard')
+        onClick: () => onViewChange?.('progress')
       });
     }
     
@@ -96,7 +96,27 @@ export default function PersonalizedDashboard({
         title: 'Consistency Over Intensity',
         message: 'Small daily actions compound more than occasional big pushes',
         action: 'Check your streaks',
-        onClick: () => onViewChange?.('dashboard')
+        onClick: () => onViewChange?.('streaks')
+      });
+    }
+
+    // Add phase-specific insight
+    insights.push({
+      type: 'phase',
+      title: getPhaseInsight().title,
+      message: `Focus: ${getPhaseInsight().focus}`,
+      action: 'View phase-specific tips',
+      onClick: () => onViewChange?.('tips')
+    });
+
+    // Add momentum loop insights
+    if (userConfig.momentumLoops.career) {
+      insights.push({
+        type: 'loop',
+        title: 'Career Loop Active',
+        message: userConfig.momentumLoops.career,
+        action: 'Track progress',
+        onClick: () => onViewChange?.('progress')
       });
     }
 
@@ -198,10 +218,10 @@ export default function PersonalizedDashboard({
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-semibold text-gray-900">Personalized Insights</h3>
           <button
-            onClick={() => setShowTips(!showTips)}
+            onClick={() => onViewChange?.('tips')}
             className="text-sm text-blue-600 hover:text-blue-800"
           >
-            {showTips ? 'Hide' : 'Show'} Tips
+            View All Tips
           </button>
         </div>
         

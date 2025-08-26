@@ -332,6 +332,94 @@ export default function Home() {
           </div>
         );
 
+      case 'progress':
+        return (
+          <div className="space-y-8">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">Daily Progress</h1>
+              <p className="text-gray-600 mt-2">Log your momentum across all focus areas</p>
+            </div>
+            <DailyProgress 
+              domains={userConfig?.focusAreas.map(f => f.toString()) || domains}
+              onSaveProgress={handleSaveProgress}
+            />
+          </div>
+        );
+
+      case 'streaks':
+        return (
+          <div className="space-y-8">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">Momentum Streaks</h1>
+              <p className="text-gray-600 mt-2">Track your consistency across domains</p>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {sampleMomentumData.map((data) => (
+                <div key={data.domain} className="bg-white rounded-lg border border-gray-200 p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-lg font-semibold text-gray-900">{data.domain}</h3>
+                    <div className="text-2xl font-bold text-blue-600">{data.streak}</div>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-500">Current Streak</span>
+                      <span className="font-medium">{data.streak} days</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-500">Best Streak</span>
+                      <span className="font-medium">{data.streak + 5} days</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-500">Momentum Score</span>
+                      <span className="font-medium">{data.momentumScore.toFixed(1)}</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+
+      case 'tips':
+        return (
+          <div className="space-y-8">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">Phase-Specific Tips</h1>
+              <p className="text-gray-600 mt-2">Personalized guidance for your momentum phase</p>
+            </div>
+            <div className="bg-white rounded-lg border border-gray-200 p-6">
+              <h2 className="text-xl font-semibold text-gray-900 mb-4">
+                {userConfig?.currentPhase === 'early' ? 'Early Stage Momentum' : 
+                 userConfig?.currentPhase === 'sustained' ? 'Sustained Momentum' : 
+                 'Transition Phase'}
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {userConfig?.currentPhase === 'early' ? [
+                  'Embrace the learning curve',
+                  'Try new things quickly',
+                  'Build foundational habits',
+                  'Connect with new communities'
+                ] : userConfig?.currentPhase === 'sustained' ? [
+                  'Deepen existing practices',
+                  'Optimize your systems',
+                  'Build compound effects',
+                  'Mentor others'
+                ] : [
+                  'Review what\'s working',
+                  'Plan your next phase',
+                  'Conserve energy',
+                  'Prepare for new challenges'
+                ].map((tip, index) => (
+                  <div key={index} className="flex items-start space-x-3 p-3 bg-gray-50 rounded-lg">
+                    <div className="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
+                    <span className="text-gray-700">{tip}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        );
+
       case 'settings':
         return (
           <div className="space-y-8">
