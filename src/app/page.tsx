@@ -213,6 +213,32 @@ export default function Home() {
       } catch (error) {
         console.error('Failed to load user config:', error);
       }
+    } else {
+      // If no config exists, create a default one to show content
+      const defaultConfig = {
+        momentumDefinition: 'consistency',
+        energyAnchors: {
+          physical: ['exercise', 'sleep'],
+          mental: ['meditation', 'reading'],
+          cultural: ['social connections']
+        },
+        momentumLoops: {
+          career: 'Weekly review of 1 new skill → apply at work → share insights',
+          culture: 'Try 1 new place weekly → reflect on experience → connect with locals',
+          growth: 'Learn 1 new thing daily → document it → share with community'
+        },
+        currentPhase: 'early',
+        focusAreas: ['Health', 'Focus', 'Output', 'Learning', 'Mood'],
+        customFocusAreas: [],
+        goals: {
+          shortTerm: 'Establish a consistent daily routine',
+          mediumTerm: 'Launch a side project or skill development initiative',
+          longTerm: 'Achieve a major career or life milestone'
+        },
+        energyDrains: []
+      };
+      setUserConfig(defaultConfig);
+      setShowOnboarding(false);
     }
   }, []);
 
@@ -328,6 +354,20 @@ export default function Home() {
               review={sampleWeeklyReview}
               onExport={(format) => console.log('Export:', format)}
               onShare={() => console.log('Share review')}
+            />
+          </div>
+        );
+
+      case 'daily-progress-log':
+        return (
+          <div className="space-y-6">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">Daily Progress Log</h1>
+              <p className="text-gray-600 mt-2">Track your momentum across all focus areas</p>
+            </div>
+            <DailyProgress 
+              domains={userConfig?.focusAreas.filter(f => typeof f === 'string') as Domain[] || domains}
+              onSaveProgress={handleSaveProgress}
             />
           </div>
         );
