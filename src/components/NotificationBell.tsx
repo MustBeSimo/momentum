@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Bell, X, Check, Trash2, Settings } from 'lucide-react';
+import { Bell, X, Trash2, Settings } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { 
   Notification, 
@@ -85,7 +85,7 @@ export default function NotificationBell({ onNotificationClick }: NotificationBe
     loadNotifications();
   };
 
-  const handleSettingChange = (key: keyof NotificationSettings, value: any) => {
+  const handleSettingChange = (key: keyof NotificationSettings, value: boolean) => {
     const newSettings = { ...settings, [key]: value };
     setSettings(newSettings);
     notificationManager.updateSettings(newSettings);

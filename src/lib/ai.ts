@@ -188,8 +188,7 @@ export interface SmartNotification {
 }
 
 export function generateSmartNotifications(
-  momentumData: MomentumScore[],
-  _tasks: Task[]
+  momentumData: MomentumScore[]
 ): SmartNotification[] {
   const notifications: SmartNotification[] = [];
   

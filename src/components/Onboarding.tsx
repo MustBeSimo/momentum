@@ -14,8 +14,7 @@ import {
   ArrowLeft,
   Check,
   Sparkles,
-  Plus,
-  Edit3
+  Plus
 } from 'lucide-react';
 import { generateMomentumLoops, generateCustomFocusArea } from '@/lib/together-ai';
 

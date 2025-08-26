@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Bell, X, Check } from 'lucide-react';
+import { Bell, X } from 'lucide-react';
 import { requestNotificationPermission } from '@/lib/notifications';
 
 export default function NotificationPermission() {
