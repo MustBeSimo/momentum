@@ -162,7 +162,7 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
   const [showCustomFocusArea, setShowCustomFocusArea] = useState(false);
   const [customFocusDescription, setCustomFocusDescription] = useState('');
   const [isGeneratingCustomArea, setIsGeneratingCustomArea] = useState(false);
-  const [showGoalAI, setShowGoalAI] = useState(false);
+
   const [isGeneratingGoals, setIsGeneratingGoals] = useState(false);
 
   const updateConfig = (updates: Partial<UserConfig>) => {
@@ -263,7 +263,7 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
     setShowCustomFocusArea(false);
   };
 
-  const generateGoalsWithAI = async () => {
+  const handleGenerateGoals = async () => {
     setIsGeneratingGoals(true);
     try {
       const allEnergyAnchors = [
@@ -641,7 +641,7 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
                   </p>
                 </div>
                 <button
-                  onClick={generateGoalsWithAI}
+                  onClick={handleGenerateGoals}
                   disabled={isGeneratingGoals}
                   className={cn(
                     "px-4 py-2 rounded-md font-medium transition-colors",

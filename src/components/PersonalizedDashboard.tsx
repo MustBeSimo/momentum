@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { UserConfig } from './Onboarding';
-import { MomentumScore } from '@/types';
+
 import { 
   Zap, 
   Target, 
