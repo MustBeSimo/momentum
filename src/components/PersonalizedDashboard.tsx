@@ -10,7 +10,6 @@ import {
   Heart, 
   Users, 
   ArrowRight,
-  CheckCircle,
   Clock,
   Star
 } from 'lucide-react';

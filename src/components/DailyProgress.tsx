@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Domain } from '@/types';
 import { cn } from '@/lib/utils';
 import { Calendar, Plus, Minus, Target, Sparkles } from 'lucide-react';
