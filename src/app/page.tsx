@@ -216,7 +216,7 @@ export default function Home() {
     } else {
       // If no config exists, create a default one to show content
       const defaultConfig = {
-        momentumDefinition: 'consistency',
+        momentumDefinition: 'consistency' as const,
         energyAnchors: {
           physical: ['exercise', 'sleep'],
           mental: ['meditation', 'reading'],
@@ -227,7 +227,7 @@ export default function Home() {
           culture: 'Try 1 new place weekly → reflect on experience → connect with locals',
           growth: 'Learn 1 new thing daily → document it → share with community'
         },
-        currentPhase: 'early',
+        currentPhase: 'early' as const,
         focusAreas: ['Health', 'Focus', 'Output', 'Learning', 'Mood'],
         customFocusAreas: [],
         goals: {
