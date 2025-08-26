@@ -2,14 +2,12 @@
 
 import { useState } from 'react';
 import { UserConfig } from './Onboarding';
-import { MomentumScore, Domain } from '@/types';
-import { cn } from '@/lib/utils';
+import { MomentumScore } from '@/types';
 import { 
   Zap, 
   Target, 
   TrendingUp, 
   Heart, 
-  Brain, 
   Users, 
   ArrowRight,
   CheckCircle,
@@ -66,7 +64,6 @@ const phaseInsights = {
 
 export default function PersonalizedDashboard({ 
   userConfig, 
-  momentumData, 
   onViewChange 
 }: PersonalizedDashboardProps) {
   const [showTips, setShowTips] = useState(false);

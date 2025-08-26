@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Domain, Phase } from '@/types';
+import { Domain } from '@/types';
 import { cn } from '@/lib/utils';
 import { 
   Zap, 
@@ -10,12 +10,14 @@ import {
   Heart, 
   Brain, 
   Users, 
-  DollarSign, 
-  BookOpen,
   ArrowRight,
   ArrowLeft,
-  Check
+  Check,
+  Sparkles,
+  Plus,
+  Edit3
 } from 'lucide-react';
+import { generateMomentumLoops, generateCustomFocusArea } from '@/lib/together-ai';
 
 interface OnboardingProps {
   onComplete: (config: UserConfig) => void;
@@ -34,7 +36,13 @@ export interface UserConfig {
     growth: string;
   };
   currentPhase: 'early' | 'sustained' | 'transition';
-  focusAreas: Domain[];
+  focusAreas: (Domain | string)[];
+  customFocusAreas: Array<{
+    name: string;
+    description: string;
+    metrics: string[];
+    color: string;
+  }>;
   goals: {
     shortTerm: string;
     mediumTerm: string;
@@ -142,6 +150,7 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
     },
     currentPhase: 'sustained',
     focusAreas: ['Health', 'Focus', 'Output'],
+    customFocusAreas: [],
     goals: {
       shortTerm: '',
       mediumTerm: '',
@@ -149,6 +158,11 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
     },
     energyDrains: []
   });
+
+  const [isGeneratingLoops, setIsGeneratingLoops] = useState(false);
+  const [showCustomFocusArea, setShowCustomFocusArea] = useState(false);
+  const [customFocusDescription, setCustomFocusDescription] = useState('');
+  const [isGeneratingCustomArea, setIsGeneratingCustomArea] = useState(false);
 
   const updateConfig = (updates: Partial<UserConfig>) => {
     setConfig(prev => ({ ...prev, ...updates }));
@@ -175,6 +189,58 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
     }));
   };
 
+  const generateAILoops = async () => {
+    setIsGeneratingLoops(true);
+    try {
+      const allEnergyAnchors = [
+        ...config.energyAnchors.physical,
+        ...config.energyAnchors.mental,
+        ...config.energyAnchors.cultural
+      ];
+      
+      const loops = await generateMomentumLoops(
+        config.momentumDefinition,
+        allEnergyAnchors,
+        config.currentPhase,
+        config.focusAreas.map(f => f.toString())
+      );
+      
+      setConfig(prev => ({
+        ...prev,
+        momentumLoops: loops
+      }));
+    } catch (error) {
+      console.error('Failed to generate loops:', error);
+    } finally {
+      setIsGeneratingLoops(false);
+    }
+  };
+
+  const generateCustomArea = async () => {
+    if (!customFocusDescription.trim()) return;
+    
+    setIsGeneratingCustomArea(true);
+    try {
+      const customArea = await generateCustomFocusArea(
+        customFocusDescription,
+        config.focusAreas.map(f => f.toString())
+      );
+      
+      setConfig(prev => ({
+        ...prev,
+        focusAreas: [...prev.focusAreas, customArea.name],
+        customFocusAreas: [...prev.customFocusAreas, customArea]
+      }));
+      
+      setCustomFocusDescription('');
+      setShowCustomFocusArea(false);
+    } catch (error) {
+      console.error('Failed to generate custom area:', error);
+    } finally {
+      setIsGeneratingCustomArea(false);
+    }
+  };
+
   const renderStep = () => {
     switch (step) {
       case 1:
@@ -191,7 +257,7 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
                 return (
                   <button
                     key={def.id}
-                    onClick={() => updateConfig({ momentumDefinition: def.id as any })}
+                    onClick={() => updateConfig({ momentumDefinition: def.id as UserConfig['momentumDefinition'] })}
                     className={cn(
                       "p-6 border-2 rounded-lg text-left transition-all",
                       config.momentumDefinition === def.id
@@ -232,7 +298,7 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
                     {options.map((option) => (
                       <button
                         key={option}
-                        onClick={() => toggleEnergyAnchor(category as any, option)}
+                        onClick={() => toggleEnergyAnchor(category as keyof UserConfig['energyAnchors'], option)}
                         className={cn(
                           "p-3 text-sm border rounded-md transition-all text-left",
                           config.energyAnchors[category as keyof UserConfig['energyAnchors']].includes(option)
@@ -256,6 +322,43 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
             <div className="text-center">
               <h2 className="text-2xl font-bold text-gray-900 mb-2">Create your momentum loops</h2>
               <p className="text-gray-600">Design small systems that feed back into each other</p>
+            </div>
+
+            {/* AI Generation Button */}
+            <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-4 border border-blue-200">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="font-medium text-gray-900 flex items-center space-x-2">
+                    <Sparkles className="w-5 h-5 text-blue-600" />
+                    <span>AI-Powered Loop Generation</span>
+                  </h3>
+                  <p className="text-sm text-gray-600 mt-1">
+                    Let AI create personalized momentum loops based on your preferences
+                  </p>
+                </div>
+                <button
+                  onClick={generateAILoops}
+                  disabled={isGeneratingLoops}
+                  className={cn(
+                    "px-4 py-2 rounded-md font-medium transition-colors",
+                    isGeneratingLoops
+                      ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                      : "bg-blue-600 text-white hover:bg-blue-700"
+                  )}
+                >
+                  {isGeneratingLoops ? (
+                    <div className="flex items-center space-x-2">
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      <span>Generating...</span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center space-x-2">
+                      <Sparkles className="w-4 h-4" />
+                      <span>Generate Loops</span>
+                    </div>
+                  )}
+                </button>
+              </div>
             </div>
             
             <div className="space-y-4">
@@ -319,7 +422,7 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
               {Object.entries(phaseDescriptions).map(([phase, desc]) => (
                 <button
                   key={phase}
-                  onClick={() => updateConfig({ currentPhase: phase as any })}
+                  onClick={() => updateConfig({ currentPhase: phase as UserConfig['currentPhase'] })}
                   className={cn(
                     "w-full p-6 border-2 rounded-lg text-left transition-all",
                     config.currentPhase === phase
@@ -350,6 +453,7 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
               <p className="text-gray-600">Select the domains that matter most to your momentum right now</p>
             </div>
             
+            {/* Standard Focus Areas */}
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
               {(['Health', 'Focus', 'Output', 'Learning', 'Mood'] as Domain[]).map((domain) => (
                 <button
@@ -369,6 +473,89 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
                 </button>
               ))}
             </div>
+
+            {/* Custom Focus Areas */}
+            {config.customFocusAreas.length > 0 && (
+              <div>
+                <h3 className="font-medium text-gray-900 mb-3">Custom Focus Areas</h3>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                  {config.customFocusAreas.map((customArea) => (
+                    <div
+                      key={customArea.name}
+                      className="p-4 border-2 rounded-lg text-center transition-all border-purple-500 bg-purple-50"
+                    >
+                      <div className="font-medium text-gray-900">{customArea.name}</div>
+                      <div className="text-xs text-gray-600 mt-1">{customArea.description}</div>
+                      <Check className="w-5 h-5 text-purple-500 mx-auto mt-2" />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Add Custom Focus Area */}
+            {!showCustomFocusArea ? (
+              <button
+                onClick={() => setShowCustomFocusArea(true)}
+                className="w-full p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-gray-400 transition-colors text-center"
+              >
+                <div className="flex items-center justify-center space-x-2">
+                  <Plus className="w-5 h-5 text-gray-400" />
+                  <span className="text-gray-600">Add Custom Focus Area</span>
+                </div>
+              </button>
+            ) : (
+              <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                <h3 className="font-medium text-gray-900 mb-3">Create Custom Focus Area</h3>
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Describe what you want to track
+                    </label>
+                    <textarea
+                      value={customFocusDescription}
+                      onChange={(e) => setCustomFocusDescription(e.target.value)}
+                      placeholder="e.g., I want to track my creative projects and artistic growth"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      rows={3}
+                    />
+                  </div>
+                  <div className="flex space-x-3">
+                    <button
+                      onClick={generateCustomArea}
+                      disabled={isGeneratingCustomArea || !customFocusDescription.trim()}
+                      className={cn(
+                        "flex-1 px-4 py-2 rounded-md font-medium transition-colors",
+                        isGeneratingCustomArea || !customFocusDescription.trim()
+                          ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                          : "bg-purple-600 text-white hover:bg-purple-700"
+                      )}
+                    >
+                      {isGeneratingCustomArea ? (
+                        <div className="flex items-center justify-center space-x-2">
+                          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                          <span>Generating...</span>
+                        </div>
+                      ) : (
+                        <div className="flex items-center justify-center space-x-2">
+                          <Sparkles className="w-4 h-4" />
+                          <span>Generate with AI</span>
+                        </div>
+                      )}
+                    </button>
+                    <button
+                      onClick={() => {
+                        setShowCustomFocusArea(false);
+                        setCustomFocusDescription('');
+                      }}
+                      className="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         );
 
