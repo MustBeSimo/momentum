@@ -17,8 +17,7 @@ import {
 
 interface PersonalizedDashboardProps {
   userConfig: UserConfig;
-  momentumData: MomentumScore[];
-  onViewChange: (view: string) => void;
+  onViewChange?: (view: string) => void;
 }
 
 const momentumDefinitionIcons = {
@@ -86,7 +85,8 @@ export default function PersonalizedDashboard({
         type: 'energy',
         title: 'Energy-First Approach',
         message: 'Focus on activities that energize you rather than drain you',
-        action: 'Review your energy anchors'
+        action: 'Review your energy anchors',
+        onClick: () => onViewChange?.('dashboard')
       });
     }
     
@@ -95,7 +95,8 @@ export default function PersonalizedDashboard({
         type: 'consistency',
         title: 'Consistency Over Intensity',
         message: 'Small daily actions compound more than occasional big pushes',
-        action: 'Check your streaks'
+        action: 'Check your streaks',
+        onClick: () => onViewChange?.('dashboard')
       });
     }
 
@@ -216,7 +217,10 @@ export default function PersonalizedDashboard({
               <div className="flex-1">
                 <h4 className="font-medium text-gray-900 text-sm">{insight.title}</h4>
                 <p className="text-xs text-gray-600 mt-1">{insight.message}</p>
-                <button className="text-xs text-blue-600 hover:text-blue-800 mt-2">
+                <button 
+                  onClick={insight.onClick}
+                  className="text-xs text-blue-600 hover:text-blue-800 mt-2"
+                >
                   {insight.action} →
                 </button>
               </div>
@@ -259,12 +263,39 @@ export default function PersonalizedDashboard({
                   <div className="text-sm font-medium text-gray-900">{goal}</div>
                   <div className="text-xs text-gray-500">{periodLabels[period as keyof typeof periodLabels]}</div>
                 </div>
-                <button className="text-xs text-blue-600 hover:text-blue-800">
+                <button 
+                  onClick={() => onViewChange?.('progress')}
+                  className="text-xs text-blue-600 hover:text-blue-800"
+                >
                   Track →
                 </button>
               </div>
             );
           })}
+        </div>
+      </div>
+
+      {/* Daily Progress Check-in */}
+      <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-200 p-6">
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900">Daily Progress</h3>
+            <p className="text-sm text-gray-600">Track your momentum across all focus areas</p>
+          </div>
+          <button 
+            onClick={() => onViewChange?.('progress')}
+            className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition-colors font-medium"
+          >
+            Log Today&apos;s Progress
+          </button>
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+          {userConfig.focusAreas.slice(0, 4).map((area, index) => (
+            <div key={index} className="bg-white rounded-lg p-3 border border-blue-100">
+              <div className="text-lg font-semibold text-gray-900">{area}</div>
+              <div className="text-xs text-gray-500">Track daily</div>
+            </div>
+          ))}
         </div>
       </div>
 

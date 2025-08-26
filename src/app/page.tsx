@@ -224,7 +224,6 @@ export default function Home() {
             {userConfig ? (
               <PersonalizedDashboard 
                 userConfig={userConfig}
-                momentumData={sampleMomentumData}
                 onViewChange={setCurrentView}
               />
             ) : (

@@ -182,6 +182,87 @@ Color: [color]`;
   }
 }
 
+export async function generateGoalsWithAI(
+  momentumDefinition: string,
+  energyAnchors: string[],
+  currentPhase: string,
+  focusAreas: string[]
+): Promise<{
+  shortTerm: string;
+  mediumTerm: string;
+  longTerm: string;
+}> {
+  const prompt = `You are a momentum coach helping someone create personalized goals.
+
+User's momentum definition: ${momentumDefinition}
+Energy anchors: ${energyAnchors.join(', ')}
+Current phase: ${currentPhase}
+Focus areas: ${focusAreas.join(', ')}
+
+Create 3 goals that are:
+1. Specific and measurable
+2. Aligned with their momentum definition and phase
+3. Realistic for the timeframes
+4. Connected to their energy anchors and focus areas
+
+Return only the 3 goals in this exact format:
+Short-term (30 days): [goal]
+Medium-term (3 months): [goal]
+Long-term (1 year): [goal]`;
+
+  try {
+    const response = await fetch('https://api.together.xyz/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${TOGETHER_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'meta-llama/Llama-3.1-8B-Instruct',
+        messages: [
+          {
+            role: 'system',
+            content: 'You are a helpful momentum coach who creates specific, achievable goals.'
+          },
+          {
+            role: 'user',
+            content: prompt
+          }
+        ],
+        max_tokens: 400,
+        temperature: 0.7,
+      } as TogetherAIRequest),
+    });
+
+    if (!response.ok) {
+      throw new Error(`API request failed: ${response.status}`);
+    }
+
+    const data: TogetherAIResponse = await response.json();
+    const content = data.choices[0]?.message?.content || '';
+
+    // Parse the response to extract the three goals
+    const lines = content.split('\n').filter(line => line.trim());
+    const shortMatch = lines.find(line => line.includes('Short-term'));
+    const mediumMatch = lines.find(line => line.includes('Medium-term'));
+    const longMatch = lines.find(line => line.includes('Long-term'));
+
+    return {
+      shortTerm: shortMatch?.replace(/Short-term.*?:/, '').trim() || 'Establish a consistent daily routine',
+      mediumTerm: mediumMatch?.replace(/Medium-term.*?:/, '').trim() || 'Launch a side project or skill development initiative',
+      longTerm: longMatch?.replace(/Long-term.*?:/, '').trim() || 'Achieve a major career or life milestone'
+    };
+  } catch (error) {
+    console.error('Together AI request failed:', error);
+    // Fallback to default goals
+    return {
+      shortTerm: 'Establish a consistent daily routine',
+      mediumTerm: 'Launch a side project or skill development initiative',
+      longTerm: 'Achieve a major career or life milestone'
+    };
+  }
+}
+
 export async function improveMomentumLoop(
   currentLoop: string,
   context: string
