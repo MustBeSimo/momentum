@@ -340,7 +340,7 @@ export default function Home() {
               <p className="text-gray-600 mt-2">Log your momentum across all focus areas</p>
             </div>
             <DailyProgress 
-              domains={userConfig?.focusAreas.map(f => f.toString()) || domains}
+              domains={userConfig?.focusAreas.filter(f => typeof f === 'string') as Domain[] || domains}
               onSaveProgress={handleSaveProgress}
             />
           </div>

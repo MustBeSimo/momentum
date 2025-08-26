@@ -65,7 +65,7 @@ export default function PersonalizedDashboard({
   userConfig, 
   onViewChange 
 }: PersonalizedDashboardProps) {
-  const [showTips, setShowTips] = useState(false);
+
 
   const getMomentumDefinitionIcon = () => {
     const Icon = momentumDefinitionIcons[userConfig.momentumDefinition];
