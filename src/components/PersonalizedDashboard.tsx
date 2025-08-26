@@ -109,8 +109,8 @@ export default function PersonalizedDashboard({
       onClick: () => onViewChange?.('tips')
     });
 
-    // Add momentum loop insights
-    if (userConfig.momentumLoops.career) {
+    // Add momentum loop insights (only if not empty)
+    if (userConfig.momentumLoops.career && userConfig.momentumLoops.career.trim()) {
       insights.push({
         type: 'loop',
         title: 'Career Loop Active',
@@ -120,22 +120,23 @@ export default function PersonalizedDashboard({
       });
     }
 
-    // Based on current phase
-    const phaseInsight = getPhaseInsight();
-    insights.push({
-      type: 'phase',
-      title: phaseInsight.title,
-      message: `Focus: ${phaseInsight.focus}`,
-      action: 'View phase-specific tips'
-    });
-
-    // Based on momentum loops
-    if (userConfig.momentumLoops.career) {
+    if (userConfig.momentumLoops.culture && userConfig.momentumLoops.culture.trim()) {
       insights.push({
         type: 'loop',
-        title: 'Career Loop Active',
-        message: userConfig.momentumLoops.career,
-        action: 'Track progress'
+        title: 'Culture Loop Active',
+        message: userConfig.momentumLoops.culture,
+        action: 'Track progress',
+        onClick: () => onViewChange?.('progress')
+      });
+    }
+
+    if (userConfig.momentumLoops.growth && userConfig.momentumLoops.growth.trim()) {
+      insights.push({
+        type: 'loop',
+        title: 'Growth Loop Active',
+        message: userConfig.momentumLoops.growth,
+        action: 'Track progress',
+        onClick: () => onViewChange?.('progress')
       });
     }
 
@@ -157,6 +158,56 @@ export default function PersonalizedDashboard({
 
   return (
     <div className="space-y-6">
+      {/* Momentum Flow Infographic */}
+      <div className="bg-white rounded-lg border border-gray-200 p-6">
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">Your Momentum Flow</h3>
+        <div className="flex items-center justify-between">
+          <div className="flex-1">
+            <div className="flex items-center space-x-4 mb-4">
+              <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                <Zap className="w-6 h-6 text-blue-600" />
+              </div>
+              <div>
+                <div className="text-sm font-medium text-gray-900">Energy Input</div>
+                <div className="text-xs text-gray-500">{getEnergyAnchorSummary().total} anchors active</div>
+              </div>
+            </div>
+            <div className="flex items-center space-x-4 mb-4">
+              <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                <Target className="w-6 h-6 text-green-600" />
+              </div>
+              <div>
+                <div className="text-sm font-medium text-gray-900">Focus Areas</div>
+                <div className="text-xs text-gray-500">{userConfig.focusAreas.length} domains tracked</div>
+              </div>
+            </div>
+            <div className="flex items-center space-x-4">
+              <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
+                <TrendingUp className="w-6 h-6 text-purple-600" />
+              </div>
+              <div>
+                <div className="text-sm font-medium text-gray-900">Momentum Output</div>
+                <div className="text-xs text-gray-500">{Object.values(userConfig.momentumLoops).filter(loop => loop.trim()).length} loops active</div>
+              </div>
+            </div>
+          </div>
+          <div className="flex-1 flex justify-center">
+            <div className="relative">
+              <div className="w-32 h-32 border-4 border-blue-200 rounded-full flex items-center justify-center">
+                <div className="w-24 h-24 border-4 border-green-200 rounded-full flex items-center justify-center">
+                  <div className="w-16 h-16 border-4 border-purple-200 rounded-full flex items-center justify-center">
+                    <div className="w-8 h-8 bg-blue-600 rounded-full"></div>
+                  </div>
+                </div>
+              </div>
+              <div className="absolute -top-2 -right-2 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
+                <div className="w-3 h-3 bg-white rounded-full"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Personalized Header */}
       <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-6 border border-blue-200">
         <div className="flex items-center space-x-3 mb-4">
@@ -283,25 +334,26 @@ export default function PersonalizedDashboard({
         </div>
       </div>
 
-      {/* Daily Progress Check-in */}
-      <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-200 p-6">
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <h3 className="text-lg font-semibold text-gray-900">Daily Progress</h3>
-            <p className="text-sm text-gray-600">Track your momentum across all focus areas</p>
+      {/* Prominent Daily Progress Check-in */}
+      <div className="bg-gradient-to-r from-green-50 to-blue-50 rounded-lg border-2 border-green-200 p-8 text-center">
+        <div className="mb-6">
+          <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <TrendingUp className="w-8 h-8 text-green-600" />
           </div>
+          <h3 className="text-2xl font-bold text-gray-900 mb-2">Ready to Log Your Progress?</h3>
+          <p className="text-gray-600 mb-6">Track your momentum across {userConfig.focusAreas.length} focus areas and keep your flow going</p>
           <button 
             onClick={() => onViewChange?.('progress')}
-            className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition-colors font-medium"
+            className="bg-green-600 text-white px-8 py-4 rounded-lg hover:bg-green-700 transition-colors font-semibold text-lg shadow-lg"
           >
-            Log Today&apos;s Progress
+            📊 Log Today&apos;s Progress
           </button>
         </div>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {userConfig.focusAreas.slice(0, 4).map((area, index) => (
-            <div key={index} className="bg-white rounded-lg p-3 border border-blue-100">
-              <div className="text-lg font-semibold text-gray-900">{area}</div>
-              <div className="text-xs text-gray-500">Track daily</div>
+            <div key={index} className="bg-white rounded-lg p-3 border border-green-100 shadow-sm">
+              <div className="text-sm font-semibold text-gray-900">{area}</div>
+              <div className="text-xs text-gray-500">Ready to track</div>
             </div>
           ))}
         </div>

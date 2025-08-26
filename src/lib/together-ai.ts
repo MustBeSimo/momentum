@@ -263,6 +263,83 @@ Long-term (1 year): [goal]`;
   }
 }
 
+export async function generateCustomFocusQuestions(
+  focusAreaName: string,
+  focusAreaDescription: string
+): Promise<string[]> {
+  const prompt = `You are helping someone create daily tracking questions for a custom focus area.
+
+Focus Area: "${focusAreaName}"
+Description: "${focusAreaDescription}"
+
+Create 4-5 specific, actionable questions that someone can answer daily to track their progress in this area. The questions should be:
+1. Specific and measurable
+2. Easy to answer with a yes/no, number, or short response
+3. Relevant to the focus area
+4. Helpful for tracking momentum
+
+Return only the questions, one per line, without numbering.`;
+
+  try {
+    const response = await fetch('https://api.together.xyz/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${TOGETHER_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'meta-llama/Llama-3.1-8B-Instruct',
+        messages: [
+          {
+            role: 'system',
+            content: 'You are a helpful momentum coach who creates specific, actionable daily tracking questions.'
+          },
+          {
+            role: 'user',
+            content: prompt
+          }
+        ],
+        max_tokens: 300,
+        temperature: 0.7,
+      } as TogetherAIRequest),
+    });
+
+    if (!response.ok) {
+      throw new Error(`API request failed: ${response.status}`);
+    }
+
+    const data: TogetherAIResponse = await response.json();
+    const content = data.choices[0]?.message?.content || '';
+
+    // Parse the response to extract questions
+    const questions = content.split('\n')
+      .map(line => line.trim())
+      .filter(line => line.length > 0 && !line.match(/^\d+\./))
+      .slice(0, 5); // Limit to 5 questions
+
+    // Fallback questions if AI fails
+    if (questions.length === 0) {
+      return [
+        `How did you progress in ${focusAreaName} today?`,
+        `What was your biggest win in ${focusAreaName}?`,
+        `What challenges did you face in ${focusAreaName}?`,
+        `How can you improve ${focusAreaName} tomorrow?`
+      ];
+    }
+
+    return questions;
+  } catch (error) {
+    console.error('Together AI request failed:', error);
+    // Fallback questions
+    return [
+      `How did you progress in ${focusAreaName} today?`,
+      `What was your biggest win in ${focusAreaName}?`,
+      `What challenges did you face in ${focusAreaName}?`,
+      `How can you improve ${focusAreaName} tomorrow?`
+    ];
+  }
+}
+
 export async function improveMomentumLoop(
   currentLoop: string,
   context: string

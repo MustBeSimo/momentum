@@ -1,9 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Domain } from '@/types';
 import { cn } from '@/lib/utils';
-import { Calendar, Plus, Minus, Target } from 'lucide-react';
+import { Calendar, Plus, Minus, Target, Sparkles } from 'lucide-react';
+import { generateCustomFocusQuestions } from '@/lib/together-ai';
 
 interface DailyProgressProps {
   domains: Domain[];
@@ -66,12 +67,64 @@ export default function DailyProgress({ domains, onSaveProgress }: DailyProgress
   const [mood, setMood] = useState(7);
   const [energy, setEnergy] = useState(7);
   const [focus, setFocus] = useState(7);
+  const [customQuestions, setCustomQuestions] = useState<Record<string, string[]>>({});
+  const [isGeneratingQuestions, setIsGeneratingQuestions] = useState<Record<string, boolean>>({});
 
   const handleScoreChange = (domain: Domain, score: number) => {
     setDomainScores(prev => ({
       ...prev,
       [domain]: Math.max(1, Math.min(10, score))
     }));
+  };
+
+  const generateQuestionsForCustomDomain = async (domainName: string) => {
+    if (customQuestions[domainName]) return; // Already generated
+    
+    setIsGeneratingQuestions(prev => ({ ...prev, [domainName]: true }));
+    
+    try {
+      const questions = await generateCustomFocusQuestions(domainName, `Track your ${domainName.toLowerCase()} progress`);
+      setCustomQuestions(prev => ({ ...prev, [domainName]: questions }));
+    } catch (error) {
+      console.error('Failed to generate questions for', domainName, error);
+      // Use fallback questions
+      setCustomQuestions(prev => ({ 
+        ...prev, 
+        [domainName]: [
+          `How did you progress in ${domainName} today?`,
+          `What was your biggest win in ${domainName}?`,
+          `What challenges did you face in ${domainName}?`,
+          `How can you improve ${domainName} tomorrow?`
+        ]
+      }));
+    } finally {
+      setIsGeneratingQuestions(prev => ({ ...prev, [domainName]: false }));
+    }
+  };
+
+  const getQuestionsForDomain = (domain: string) => {
+    // Check if it's a standard domain
+    if (domainQuestions[domain as keyof typeof domainQuestions]) {
+      return domainQuestions[domain as keyof typeof domainQuestions];
+    }
+    
+    // Check if it's a custom domain
+    if (customQuestions[domain]) {
+      return customQuestions[domain];
+    }
+    
+    // Generate questions for custom domain if not already done
+    if (!isGeneratingQuestions[domain]) {
+      generateQuestionsForCustomDomain(domain);
+    }
+    
+    // Return loading questions
+    return [
+      "Loading questions...",
+      "Please wait...",
+      "Generating personalized questions...",
+      "Almost ready..."
+    ];
   };
 
   const handleSave = () => {
@@ -185,7 +238,13 @@ export default function DailyProgress({ domains, onSaveProgress }: DailyProgress
 
             {/* Domain-specific questions */}
             <div className="mt-4 space-y-2">
-              {domainQuestions[currentDomain].map((question, index) => (
+              {isGeneratingQuestions[currentDomain] && (
+                <div className="flex items-center space-x-2 text-sm text-purple-600 mb-2">
+                  <Sparkles className="w-3 h-3 animate-pulse" />
+                  <span>Generating personalized questions...</span>
+                </div>
+              )}
+              {getQuestionsForDomain(currentDomain).map((question, index) => (
                 <div key={index} className="flex items-center space-x-2 text-sm text-gray-600">
                   <Target className="w-3 h-3 text-gray-400" />
                   <span>{question}</span>
