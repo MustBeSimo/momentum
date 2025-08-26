@@ -13,6 +13,7 @@ import {
   TrendingUp,
   Zap
 } from 'lucide-react';
+import NotificationBell from './NotificationBell';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -119,6 +120,7 @@ export default function Layout({ children, currentView, onViewChange }: LayoutPr
             </div>
 
             <div className="flex items-center space-x-4">
+              <NotificationBell />
               <div className="hidden sm:flex items-center space-x-2 text-sm text-gray-500">
                 <span>Last updated:</span>
                 <span>2 min ago</span>

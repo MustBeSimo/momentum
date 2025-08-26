@@ -18,6 +18,12 @@ import AIInsights from '@/components/AIInsights';
 import DailyProgress, { DailyProgressData } from '@/components/DailyProgress';
 import Onboarding, { UserConfig } from '@/components/Onboarding';
 import PersonalizedDashboard from '@/components/PersonalizedDashboard';
+import { 
+  notificationManager, 
+  generateMomentumNotifications, 
+  generateEnergyAnchorReminders 
+} from '@/lib/notifications';
+import NotificationPermission from '@/components/NotificationPermission';
 
 // Sample data for demonstration
 const sampleMomentumData: MomentumScore[] = [
@@ -131,6 +137,7 @@ export default function Home() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [userConfig, setUserConfig] = useState<UserConfig | null>(null);
   const [showOnboarding, setShowOnboarding] = useState(true);
+  const [lastCheckin, setLastCheckin] = useState<Date | undefined>();
 
   const handleAddTask = (taskData: Omit<Task, 'id' | 'userId' | 'createdAt'>) => {
     const newTask: Task = {
@@ -154,6 +161,24 @@ export default function Home() {
 
   const handleSaveProgress = (progress: DailyProgressData) => {
     console.log('Progress saved:', progress);
+    setLastCheckin(new Date());
+    
+    // Generate notifications based on progress
+    if (userConfig) {
+      const momentumNotifications = generateMomentumNotifications(
+        userConfig,
+        sampleMomentumData,
+        lastCheckin
+      );
+      
+      const energyNotifications = generateEnergyAnchorReminders(userConfig);
+      
+      // Add notifications to the manager
+      [...momentumNotifications, ...energyNotifications].forEach(notification => {
+        notificationManager.addNotification(notification);
+      });
+    }
+    
     // In a real app, this would save to a database
     // and update momentum calculations
   };
@@ -161,6 +186,18 @@ export default function Home() {
   const handleOnboardingComplete = (config: UserConfig) => {
     setUserConfig(config);
     setShowOnboarding(false);
+    
+    // Generate initial notifications
+    const initialNotifications = generateMomentumNotifications(
+      config,
+      sampleMomentumData,
+      lastCheckin
+    );
+    
+    initialNotifications.forEach(notification => {
+      notificationManager.addNotification(notification);
+    });
+    
     // In a real app, this would save to localStorage or database
     localStorage.setItem('userConfig', JSON.stringify(config));
   };
@@ -320,8 +357,11 @@ export default function Home() {
   }
 
   return (
-    <Layout currentView={currentView} onViewChange={setCurrentView}>
-      {renderCurrentView()}
-    </Layout>
+    <>
+      <Layout currentView={currentView} onViewChange={setCurrentView}>
+        {renderCurrentView()}
+      </Layout>
+      <NotificationPermission />
+    </>
   );
 }
